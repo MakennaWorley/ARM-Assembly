@@ -1,0 +1,79 @@
+;input registers
+;       R0- the value of n
+
+;Output registers
+;       R0- the value of i
+
+;Other registers
+;       R5- temp storage for R0 or n
+;       R6- temp storage for R1 or i
+;       R7- value 3, used in the .else
+;       R8- value 1, used in the .else
+
+; External methods
+EXTERN .std_print_number
+EXTERN .std_print
+EXTERN .std_println
+
+        LDR R0,= 100 ;for testing only
+
+        LDR R6,= 0
+        LDR R7,= 3
+        LDR R8,= 1
+        
+.while
+        CMP R0, #1
+        BEQ .end ;if n=1, then end
+        
+        MOV R5,R0
+        LDR R1,= 0
+        BL .std_print_number
+        LDR R0,= .space
+        BL .std_print
+        MOV R0,R5
+        
+        TST R0, #1
+        BEQ .if
+        
+        B .else
+        
+.whileEnd
+        ADD R6, R6, #1
+        B .while
+
+.if
+        LSR R0, R0, #1
+        B .whileEnd
+
+.else
+        MOV R5, R0
+        MLA R0, R5, R7, R8
+        B .whileEnd
+
+.end
+        LDR R0,= .endNumber
+        BL .std_println
+        LDR R0,= .endFront
+        BL .std_print
+        MOV R0, R6
+        LDR R1,= 0
+        BL .std_print_number
+        LDR R0,= .endEnd
+        BL .std_print
+        STOP
+
+
+
+;things to be printed
+
+.space
+        DCB ' ', 0
+        
+.endNumber
+        DCB '1', 0
+        
+.endFront
+        DCB 'It took ', 0
+        
+.endEnd
+        DCB ' iterations to reach 1.', 0

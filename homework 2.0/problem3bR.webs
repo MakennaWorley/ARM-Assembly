@@ -1,0 +1,20 @@
+;input registers
+;       R1- the value of x
+
+;Output registers
+;       R0- the value of f
+
+;Other registers
+;       R2- checking if x (R1) is less than 0
+
+        LDR R1,= -1
+        LDR R2,= 0
+        
+        CMP R2, R1
+        ;I used branching instead of using conditional ADD and SUB
+        LDRLT R0,= 1 ;less than
+        LDREQ R0,= 2 ;equal
+        LDRGT R0,= -1 ;greater than
+        
+.stop
+        STOP

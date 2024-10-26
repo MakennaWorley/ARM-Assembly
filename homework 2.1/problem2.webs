@@ -1,0 +1,383 @@
+; External methods
+EXTERN .std_print_number
+EXTERN .std_print
+EXTERN .std_println
+EXTERN .std_rand
+EXTERN .std_srand
+
+        LDR R0,= 64
+        BL .std_rand
+
+        LDR R0,= .empty
+        LDR R1,= 20
+        BL .fill_array
+        
+        LDR R0,= .empty
+        LDR R1,= 20
+        BL .print_array
+        
+        LDR R0,= .empty
+        LDR R1,= 20
+        BL .minmax
+        BL .minmax_print
+        
+        LDR R0,= .empty
+        LDR R1,= 20
+        BL .sort
+        
+        LDR R0,= .empty
+        LDR R1,= 20
+        BL .print_array
+        
+        ; code for testing the quick sort
+        LDR R0,= .space
+        BL .std_println
+        
+        LDR R0,= 1
+        BL .std_rand
+
+        LDR R0,= .empty
+        LDR R1,= 20
+        BL .fill_array
+        
+        LDR R0,= .empty
+        LDR R1,= 20
+        BL .print_array
+        
+        LDR R0,= .empty
+        LDR R1,= 0
+        LDR R2,= 20
+        BL .q_sort
+        
+        LDR R0,= .empty
+        LDR R1,= 20
+        BL .print_array
+        
+        STOP
+
+;print_array
+;input registers
+;       R0- array
+;       R1- length of the array
+;output registers
+;       NONE
+;other registers
+;       R10- storage of address of array
+;       R11- top value
+;       R12- i
+.print_array ;using a while loop
+        STR LR,[SP, #-4]!
+        STMFD SP!, {R10-R12}
+
+        MOV R10, R0
+        SUB R11, R1, #1
+        LDR R12,= 0
+        
+        .print_array_while
+                CMP R12, R11
+                BGE .print_array_whileEnd
+                
+                LDR R0, [R10, R12, LSL #2]
+                
+                LDR R1,= 0
+                BL .std_print_number
+                LDR R0,= .space
+                Bl .std_print
+                
+                ADD R12, R12, #1
+                B .print_array_while
+        
+        .print_array_whileEnd
+                LDR R0, [R10, R12, LSL #2]
+                LDR R1,= 0
+                BL .std_print_number
+                LDR R0,= .space
+                BL .std_println
+                
+                LDMFD SP!, {R10-R12}
+                LDR PC, [SP], #4 ;leaving the .print_array
+                
+;fill_array
+;input registers
+;       R0- array
+;       R1- length of the array
+;output registers
+;       NONE
+;other registers
+;       R9- array
+;       R10- top value
+;       R11- 0x3FF
+;       R12- i
+.fill_array
+        STR LR,[SP, #-4]!
+        STMFD SP!, {R9-R12}
+        
+        MOV R9, R0
+        MOV R10, R1
+        LDR R11,= 0x3FF
+        LDR R12,= 0
+        
+        .fill_array_while
+                CMP R12, R10
+                BGE .fill_array_whileEnd
+                
+                BL .std_rand
+                AND R0, R0, R11
+                
+                STR R0, [R9, R12, LSL #2]
+                
+                ADD R12, R12, #1
+                B .fill_array_while
+        
+        .fill_array_whileEnd
+                MOV R0, R9
+                LDMFD SP!, {R9-R12}
+                LDR PC, [SP], #4 ;leaving the .fill_array
+
+;minmax
+;input registers
+;       R0- array
+;       R1- length of the array
+;output registers
+;       NONE
+;other registers
+;       R6- min value
+;       R7- max value
+;       R10- array
+;       R11- length of array
+;       R12- i
+.minmax ;using a while loop
+        STR LR,[SP, #-4]!
+        STMFD SP!, {R6-R7, R10-R12}
+
+        MOV R10, R0
+        MOV R11, R1
+        LDR R12,= 0
+        
+        .minmax_while
+                CMP R12, R11
+                BGE .minmax_whileEnd
+                
+                LDR R0, [R10, R12, LSL #2]
+                
+                CMP R12, #0
+                BEQ .minmax_first_loop
+                
+                CMP R0, R6 ;min
+                MOVLT R6, R0 ;array[i] < min
+                
+                CMP R0, R7 ;max
+                MOVGT R7, R0 ;array[i] > max
+                
+                
+                ADD R12, R12, #1
+                B .minmax_while
+        
+        .minmax_whileEnd
+                MOV R0, R6
+                MOV R1, R7
+                LDMFD SP!, {R6-R7, R10-R12}
+                LDR PC, [SP], #4 ;leaving the .print_array
+        
+        .minmax_first_loop
+                MOV R6, R0
+                MOV R7, R0
+                ADD R12, R12, #1
+                B .minmax_while
+
+;because I'm stupid, I'm going to write a simple function to print minmax for me
+;minmax_print
+;input registers
+;       R0- min
+;       R1- max
+;output registers
+;       NONE
+;other registers
+;       R11- min
+;       R12- max
+.minmax_print
+        STR LR,[SP, #-4]!
+        STMFD SP!, {R11-R12}
+        
+        MOV R11, R0
+        MOV R12, R1
+        
+        LDR R0,= .min
+        BL .std_print
+        MOV R0, R11
+        LDR R1,= 0
+        BL .std_print_number
+        LDR R0,= .space
+        BL .std_println
+        
+        LDR R0,= .max
+        BL .std_print
+        MOV R0, R12
+        LDR R1,= 0
+        BL .std_print_number
+        LDR R0,= .space
+        BL .std_println
+        
+        LDMFD SP!, {R11-R12}
+        LDR PC, [SP], #4
+        
+;sort
+;input registers
+;       R0- array
+;       R1- length of array
+;output registers
+;       NONE
+;other registers
+;       R5- array value [j-1]
+;       R6- array value [j]
+;
+;       R8- j - 1
+;       R9- array
+;       R10- array length (n)
+;       R11- outer for loop i
+;       R12- inner for loop j
+.sort
+        STR LR,[SP, #-4]!
+        STMFD SP!, {R5-R6, R8-R12}
+
+        MOV R9, R0
+        MOV R10, R1
+        LDR R11,= 1 ;i
+        
+        .sort_outer_loop
+                CMP R11, R10 ;i and n
+                BGE .sort_outer_loopEnd ; i < n
+                
+                MOV R12, R11
+                SUB R8, R12, #1
+                
+                B .sort_inner_loop
+                
+                .sort_inner_loop
+                        CMP R12, #0 ;j
+                        BLE .sort_inner_loopEnd ; j <= 0
+                        
+                        LDR R5, [R9, R8, LSL #2] ;at j-1
+                        LDR R6, [R9, R12, LSL #2] ;at j
+                        
+                        CMP R6, R5
+                        BLT .sort_switch ;[j] < [j-1]
+                        
+                        SUB R12, R12, #1
+                        SUB R8, R12, #1
+                        B .sort_inner_loop
+                        
+                        .sort_switch
+                                STR R6, [R9, R8, LSL #2] ;j-1
+                                STR R5, [R9, R12, LSL #2] ;j
+                                
+                                SUB R12, R12, #1
+                                SUB R8, R12, #1
+                                B .sort_inner_loop
+                                
+                        
+                        .sort_inner_loopEnd
+                                ADD R11, R11, #1
+                                B .sort_outer_loop
+                        
+        
+        .sort_outer_loopEnd
+                LDMFD SP!, {R5-R6, R8-R12}
+                LDR PC, [SP], #4 ;leaving the .print_array
+                
+;q_sort
+;input registers
+;       R0- array
+;       R1- variable a
+;       R2- variable b
+;output registers
+;       NONE
+;other registers
+;       R5- array value [piv]
+;       R6- array value [i]
+;       R7- array value [piv + 1]
+;       R8- piv
+;       R9- a+1
+;       R10- i
+;       R11- piv + 1
+.q_sort
+        STR LR, [SP, #-4]!
+        STMFD SP!, {R5-R11}
+        
+        ADD R9, R1, #1 ;a+1
+        CMP R9, R2 ;a+1 and b if
+        BGE .q_sort_end
+
+        MOV R9, R1 ;reset
+        ADD R10, R1, #1 ;i = a+1
+        B .q_sort_for
+
+        .q_sort_for
+                CMP R10, R2 ;a+1 and b
+                BGE .q_sort_forEnd ; a >= b
+        
+                ADD R11, R9, #1 ;piv + 1
+                
+                LDR R5, [R0, R9, LSL #2] ;[piv]
+                LDR R6, [R0, R10, LSL #2] ;[i]
+                
+                CMP R6, R5 ;[i] < [piv]
+                BLT .q_sort_if
+        
+                ADD R10, R10, #1
+                B .q_sort_for
+        
+                .q_sort_if
+                        LDR R7, [R0, R11, LSL #2] ;[piv + 1]
+                
+                        ;swap 1, [i] and [piv + 1]
+                        STR R6, [R0, R11, LSL #2]
+                        STR R7, [R0, R10, LSL #2]
+                
+                        LDR R5, [R0, R9, LSL #2] ;[i]
+                        LDR R7, [R0, R11, LSL #2] ;[piv+1]
+                
+                        ;swap 2, [piv + 1] and [piv]
+                        STR R7, [R0, R9, LSL #2]
+                        STR R5, [R0, R11, LSL #2]
+                
+                        ADD R9, R9, #1 ;a+1
+                        ADD R10, R10, #1 ;i
+                        B .q_sort_for
+
+.q_sort_forEnd
+        MOV R6, R2
+        MOV R2, R9 ;a+1
+        BL .q_sort
+
+        MOV R1, R11 ;piv + 1
+        MOV R2, R6
+        BL .q_sort
+
+        LDMFD SP!, {R5-R11} 
+        LDR PC, [SP], #4
+        
+.q_sort_end
+        LDMFD SP!, {R5-R11} 
+        LDR PC, [SP], #4
+        
+;Other stuff
+.empty
+        FILL 80
+
+.array
+        ALIGN
+        DCD 64, 128, 256, 32, 16, 0
+
+.array2
+        ALIGN
+        DCD 20, 59, -50, 0, 5, 0
+
+.space
+        DCB ' ', 0
+        
+.min
+        DCB 'min number is ', 0
+
+.max
+        DCB 'max number is ', 0

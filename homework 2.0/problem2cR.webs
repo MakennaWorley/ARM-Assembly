@@ -1,0 +1,47 @@
+;input registers
+;       R1- the value of x
+
+;Output registers
+;       R0- the value of f
+
+;Other registers
+;       R2- checking if x (R1) is less than 100
+;       R3- for-loop i = 100
+
+; External methods
+EXTERN .std_print_number
+EXTERN .std_print
+
+        LDR R1,= 99
+        LDR R2,= 100
+        LDR R3,= 100 ;i
+        
+        CMP R1, R2 ;these are flipped
+        ;x is less than 100
+        BLT .if
+        
+        B .else
+
+.if
+        B .for
+        B .stop
+
+.else
+        LDR R0,= -1
+        ;BL .std_print_number
+        B .stop
+        
+.for
+        CMP R3, R1 ;switched
+        ; i is greater than x
+        BLE .stop
+        
+        ADD R0, R0, R3; f = f + i
+        SUB R3, R3, #1 ;--i
+        B .for
+        
+.stop
+        STOP
+
+.space
+        DCB ' ', 0

@@ -1,0 +1,89 @@
+;Other registers
+;       R0- where time is temporarily stored
+;       R1- where date is temporarily stored then changed to
+;           the number of digits needed to be printed
+;       R6- temporary place for shifted bits to be
+;       R7- syscall number
+;       R8- Hex code AND 2 bytes
+;       R9- Hex code AND 4 bytes
+;       R10- ASCII code for special character
+;       R11- home for time 0xHH_MMSS
+;       R12- home for date 0xYYYY_MMDD
+
+; External methods
+EXTERN .std_print_number
+
+        LDR R7,= 0xCA11_0100
+        ;now working with the newest update which doesn't allow
+        ;       SWI to take operands
+        SWI
+        LDR R8,= 0xFF
+        LDR R9,= 0xFFFF
+        LDR R10,= 0x2D
+        
+        MOV R11, R0
+        MOV R12, R1
+        
+        LSR R6, R12, #16 ;year
+        AND R0, R6, R9
+        LDR R1,= 4
+        BL .std_print_number
+        
+;       Print - character
+        LDR R7,= 0xCA11_0011
+        MOV R0, R10
+        SWI
+        
+        LSR R6, R12, #8 ;month
+        AND R0, R6, R8
+        LDR R1,= 2
+        BL .std_print_number
+        
+;       Print - character
+        LDR R7,= 0xCA11_0011
+        MOV R0, R10
+        SWI
+        
+        LDR R1,= 2 ;day
+        AND R0, R12, R8
+        BL .std_print_number
+        
+;---------------------------------------------
+
+;       Print ' ' character
+        LDR R10,= 0x20
+        LDR R7,= 0xCA11_0011
+        MOV R0, R10
+        SWI
+        SWI
+        SWI
+        
+        LSR R6, R11, #16 ;hour
+        AND R0, R6, R8
+        LDR R1,= 2
+        BL .std_print_number
+        
+;       Print : character
+        LDR R10,= 0x3A
+        LDR R7,= 0xCA11_0011
+        MOV R0, R10
+        SWI
+        
+        LSR R6, R11, #8 ;minute
+        AND R0, R6, R8
+        LDR R1,= 2
+        BL .std_print_number
+        
+;       Print : character
+        LDR R10,= 0x3A
+        LDR R7,= 0xCA11_0011
+        MOV R0, R10
+        SWI
+        
+        LDR R1,= 2 ;sec
+        ;It's supposed to be R8 and not 0xF since 0xF only unmasks up to 0-15
+        AND R0, R11, R8
+        BL .std_print_number
+        
+        
+        STOP

@@ -1,0 +1,23 @@
+;input registers
+;       R1- the value of x
+
+;Output registers
+;       R0- the value of f
+
+;Other registers
+;       R2- checking if x (R1) is less than 0
+
+; External methods
+EXTERN .std_print_number
+EXTERN .std_print
+
+        LDR R1,= -1
+        LDR R2,= 0
+        
+        CMP R1, R2
+        ;I used branching instead of using conditional ADD and SUB
+        ADDLT R0, R1, #100 ;x<0 add 100
+        SUBGE R0, R1, #100 ;x>=0 sub 100
+
+        STOP
+
